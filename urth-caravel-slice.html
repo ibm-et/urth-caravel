@@ -1,0 +1,125 @@
+<!--
+# (c) Copyright Jupyter Development Team
+# (c) Copyright IBM Corp. 2016
+-->
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../iron-resizable-behavior/iron-resizable-behavior.html">
+
+<script src="dist/css-theme.entry.js"></script>
+<script src="../jquery/dist/jquery.js"></script> 
+<script src="../d3/d3.js"></script>
+<script src="../nvd3/build/nv.d3.js"></script>
+<script src="dist/caravel.entry.js"></script>
+
+<!--
+Represents a widget that renders a data slice using the caravel library
+
+Example:
+
+```html
+<urth-caravel-slice></urth-caravel-slice>
+```
+
+@group Urth Caravel
+@element urth-caravel-slice
+-->
+<dom-module id="urth-caravel-slice">
+<!--      <link rel="import" type="css" href="../fontawesome/css/font-awesome.min.css"> -->
+      <link rel="import" type="css" href="../nvd3/build/nv.d3.css" />
+      <link rel="import" type="css" href="http://192.168.99.100:8081/static/assets/stylesheets/caravel.css" />
+      <link rel="import" type="css" href="http://192.168.99.100:8081/static/assets/visualizations/nvd3_vis.css" />
+    
+    <template>
+      <style>
+          #content {
+              display: none;
+          }
+      </style>
+      <link rel="stylesheet" type="text/css" href="../nvd3/build/nv.d3.css" />
+      <link rel="stylesheet" type="text/css" href="http://192.168.99.100:8081/static/assets/stylesheets/caravel.css" />
+      <link rel="stylesheet" type="text/css" href="http://192.168.99.100:8081/static/assets/visualizations/nvd3_vis.css" />
+          <div
+            id$="{{dataSlice.token}}"
+            class$="widget viz slice {{dataSlice.form_data.viz_type}}"
+            data-slice$="{{dataSlice}}"
+            style="height: 500px;">
+            <img src="http://192.168.99.100:8081/static/assets/images/loading.gif" class="loading" alt="loading">
+            <div id$="{{dataSlice.token}}_con" class="slice_container" style="height: 100%; width: 100%"></div>
+          </div>
+        <div id="content"><content></content></div>
+    </template>
+
+    <script>
+    (function () {
+        'use strict';
+
+        Polymer({
+            is: 'urth-caravel-slice',
+            properties: {
+                type: {
+                    type: String
+                },
+                dataSlice: {
+                    type: Object,
+                    observer: '_dataSliceChanged'
+                }
+            },
+
+            behaviors: [
+                Polymer.IronResizableBehavior
+            ],
+
+            listeners: {
+                'iron-resize': '_resize'
+            },
+
+/*
+            observers: [
+                '_dataSliceDeep(dataSlice.*)'
+            ],
+
+            _dataSliceDeep: function(change) {
+                if (change.path == 'dataSlice') { return; }
+                this.$$('#' + this.dataSlice.token).setAttribute('data-slice', JSON.stringify(this.dataSlice));
+                this._dataSliceChanged();
+            },
+*/
+
+            _dataSliceChanged: function() {
+                if (this.slice) {
+                    this.slice.render(false, this.root);
+                }
+            },
+
+            _resize: function() {
+                if (this.slice) {
+                    this.slice.resize();
+                }
+            },
+
+            ready: function() {
+                var display = window.getComputedStyle(this).display;
+                if (display === 'none' || document.readyState !== 'complete') {
+                    this.async(this.ready, 200);
+                    return;
+                }
+
+                this.dataSlice = JSON.parse(this.innerText || "{}");
+
+                // Dynamically register this visualization
+                var visType = this.dataSlice.form_data.viz_type;
+                px.registerViz(visType);
+
+                var data = $(this.$$('.slice')).data('slice');
+                var slice = this.slice = px.Slice(data, undefined, this.root);
+                $(this.$$('.slice')).data('slice', slice);
+
+                // call vis render method, which issues ajax
+                slice.render(false, this.root);
+
+                this.fire('urth-viz-render');
+            }
+        });
+    })();
+    </script>
+</dom-module>

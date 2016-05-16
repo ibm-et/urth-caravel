@@ -1,0 +1,27 @@
+{
+  "name": "urth-caravel",
+  "version": "0.0.1",
+  "description": "Represents a widget that displays a data slice using caravel",
+  "main": "urth-caravel-slice.html",
+  "keywords": [
+    "urth",
+    "caravel",
+    "web-components"
+  ],
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "polymer": "Polymer/polymer#^1.2.4",
+    "iron-resizable-behavior": "PolymerElements/iron-resizable-behavior#^1.0.0",
+    "d3": "^3",
+    "nvd3": "1.8.1",
+    "jquery": "*",
+    "requirejs": "^2.1.0"
+  },
+  "private": true
+}
